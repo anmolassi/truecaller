@@ -1,6 +1,5 @@
 # vs code
-.vscode
-s
+/.vscode
 # compiled output
 /dist
 /node_modules
