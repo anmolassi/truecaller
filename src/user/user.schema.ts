@@ -6,6 +6,7 @@ import {
   Unique,
   BeforeCreate,
 } from 'sequelize-typescript';
+import { v4 as uuidv4 } from 'uuid';
 import { hashIt } from 'src/services/helper/hashing.service';
 @Table({
   tableName: 'users',
@@ -17,6 +18,10 @@ export class UserModel extends Model {
   @Column({ type: DataType.INTEGER, primaryKey: true, autoIncrement: true })
   id: number;
 
+  @Unique
+  @Column({ type: DataType.STRING, allowNull: true })
+  uuid: string;
+
   @Column({ type: DataType.STRING, allowNull: false })
   name: string;
 
@@ -25,7 +30,7 @@ export class UserModel extends Model {
   email: string;
 
   @Unique
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.BIGINT, allowNull: false })
   mobile: number;
 
   @Column({ type: DataType.STRING, allowNull: false })
@@ -36,6 +41,7 @@ export class UserModel extends Model {
 
   @BeforeCreate
   static async hashPassword(user: UserModel, options: any) {
+    user.uuid = uuidv4();
     user.password = await hashIt(user.password);
   }
   

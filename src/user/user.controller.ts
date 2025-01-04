@@ -36,7 +36,7 @@ export class UserController {
       request,
       response,
       HttpStatus.OK,
-      'User created successfully',
+      'User fetched successfully',
       user,
     );
   }

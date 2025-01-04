@@ -7,9 +7,11 @@ export class UserRepository {
     @InjectModel(UserModel)
     private readonly userModel: typeof UserModel,
   ) {}
+
   async create(usersData: any): Promise<UserModel> {
     return this.userModel.create(usersData);
   }
+  
   async findBy(searchObjUser: any, attributes: string[]): Promise<UserModel[]> {
     const users = await this.userModel.findAll({
       where: searchObjUser,
