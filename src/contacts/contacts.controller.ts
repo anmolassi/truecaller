@@ -1,4 +1,15 @@
-import { Body, Controller, Get, HttpStatus, Post, Query, Req, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { Request, Response } from 'express';
 import { ContactsService } from './contacts.service';
@@ -8,6 +19,7 @@ import { UserAuth } from 'src/decorators/user-auth.decorator';
 @Controller('/v1/contacts')
 export class ContactsController {
   constructor(private contactsService: ContactsService) {}
+
   @Post()
   @UserAuth()
   async createContacts(
@@ -15,30 +27,47 @@ export class ContactsController {
     @Req() request: Request,
     @Res() response: Response,
   ): Promise<Response> {
-    const user = await this.contactsService.createContacts(body);
+    const contacts = await this.contactsService.createContacts(body);
     return sendResponse(
       request,
       response,
       HttpStatus.OK,
       'Contacts uploaded successfully',
-      user,
+      contacts,
     );
   }
 
   @Get()
-   @UserAuth()
+  @UserAuth()
   async getContacts(
-    @Query() query: {query: string},
+    @Query() query: { query: string },
     @Req() request: Request,
     @Res() response: Response,
   ): Promise<Response> {
-    const user = await this.contactsService.getContacts(query);
+    const contacts = await this.contactsService.getContacts(query);
     return sendResponse(
       request,
       response,
       HttpStatus.OK,
-      'User fetched successfully',
-      user,
+      'Contacts fetched successfully',
+      contacts,
+    );
+  }
+
+  @Patch('/:mobile')
+  @UserAuth()
+  async updateContacts(
+    @Param() mobile: string,
+    @Req() request: Request,
+    @Res() response: Response,
+  ): Promise<Response> {
+    const updatedRows = await this.contactsService.updateContact(mobile);
+    return sendResponse(
+      request,
+      response,
+      HttpStatus.OK,
+      'Contacts updated successfully',
+      { numberOfRowsUpdated: updatedRows },
     );
   }
 }

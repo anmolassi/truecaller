@@ -22,4 +22,8 @@ export class GetUserDto {
   @Max(9999999999)
   @Transform(({ value }) => Number(value))
   mobile?: number;
+
+  @IsNotEmpty()
+  @IsOptional()
+  uuid?: string;
 }

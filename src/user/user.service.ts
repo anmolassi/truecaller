@@ -25,7 +25,7 @@ export class UserService {
   }
 
   async getUser(body: GetUserDto): Promise<UserModel[]> {
-    if (!body.mobile && !body.email) {
+    if (!body.mobile && !body.email && !body.uuid) {
       throw new HttpException(
         'Both Mobile and email are absent. Send atleast one.',
         HttpStatus.BAD_REQUEST,

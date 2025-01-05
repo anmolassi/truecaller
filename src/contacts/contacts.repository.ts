@@ -10,6 +10,16 @@ export class ContactsRepository {
     private readonly contactsModel: typeof ContactsModel,
   ) {}
 
+  async update(searchObj: any): Promise<number> {
+    const [updatedCount] = await ContactsModel.update(
+      { spamReported: Sequelize.literal('spam_reported + 1') },
+      {
+        where: searchObj,
+      },
+    );
+    return updatedCount;
+  }
+
   async bulkCreate(contactsData: any): Promise<ContactsModel[]> {
     const contacts = await this.contactsModel.bulkCreate(contactsData, {
       validate: true,

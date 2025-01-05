@@ -1,35 +1,28 @@
-import { createCipheriv, createDecipheriv, randomBytes, scrypt } from 'crypto';
-import { promisify } from 'util';
+import * as crypto from 'crypto';
 
-export const encryptIt = async (value: string) => {
-  const password = process.env.ENCRYPTION_PASSWORD;
-  const iv = randomBytes(16);
-  const key = (await promisify(scrypt)(password, 'salt', 32)) as Buffer;
-  const cipher = createCipheriv('aes-256-ctr', key, iv);
+const ENCRYPTION_KEY = '12345678901234567890123456789012'; // 32 bytes
+const ENCRYPTION_IV = '1234567890123456'; // 16 bytes
 
-  const encryptedText = Buffer.concat([
-    cipher.update(value, 'utf8'),
-    cipher.final(),
-  ]);
+function encryptIt(data: string): string {
+  const cipher = crypto.createCipheriv(
+    'aes-256-cbc',
+    Buffer.from(ENCRYPTION_KEY),
+    Buffer.from(ENCRYPTION_IV),
+  );
+  let encrypted = cipher.update(data, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+  return encrypted;
+}
 
-  const encryptedData = Buffer.concat([iv, encryptedText]);
-  return encryptedData.toString('base64');
-};
+function decryptIt(encryptedData: string): string {
+  const decipher = crypto.createDecipheriv(
+    'aes-256-cbc',
+    Buffer.from(ENCRYPTION_KEY),
+    Buffer.from(ENCRYPTION_IV),
+  );
+  let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
+  return decrypted;
+}
 
-export const decryptIt = async (encryptedDataBase64: string) => {
-  const password = process.env.ENCRYPTION_PASSWORD;
-  const encryptedData = Buffer.from(encryptedDataBase64, 'base64');
-  const iv = encryptedData.slice(0, 16);
-  const encryptedText = encryptedData.slice(16);
-
-  const key: Buffer = (await promisify(scrypt)(password, 'salt', 32)) as Buffer;
-
-  const decipher = createDecipheriv('aes-256-ctr', key, iv);
-
-  const decryptedText = Buffer.concat([
-    decipher.update(encryptedText),
-    decipher.final(),
-  ]);
-
-  return decryptedText.toString('utf8');
-};
+export { encryptIt, decryptIt };
