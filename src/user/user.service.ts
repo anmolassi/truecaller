@@ -14,26 +14,34 @@ export class UserService {
     private contactsRepository: ContactsRepository,
   ) {}
   async createUser(body: CreateUserDto): Promise<UserModel> {
-    const createBody = { ...body };
-    const user = await this.userRepository.create(createBody);
-    await this.contactsRepository.bulkCreate([
-      { ...user.dataValues, createdBy: user.uuid, isUser: true },
-    ]);
-    const jwt = generateJwtToken(user.dataValues);
-    user.dataValues['jwt'] = jwt;
-    return user;
+    try {
+      const createBody = { ...body };
+      const user = await this.userRepository.create(createBody);
+      await this.contactsRepository.bulkCreate([
+        { ...user.dataValues, createdBy: user.uuid, isUser: true },
+      ]);
+      const jwt = generateJwtToken(user.dataValues);
+      user.dataValues['jwt'] = jwt;
+      return user;
+    } catch (err) {
+      throw err;
+    }
   }
 
   async getUser(body: GetUserDto): Promise<UserModel[]> {
-    if (!body.mobile && !body.email && !body.uuid) {
-      throw new HttpException(
-        'Both Mobile and email are absent. Send atleast one.',
-        HttpStatus.BAD_REQUEST,
-      );
+    try {
+      if (!body.mobile && !body.email && !body.uuid) {
+        throw new HttpException(
+          'Both Mobile and email are absent. Send atleast one.',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      const search = { ...body };
+      const attributes: any = UserConstants.DEFAULT_LISTING_ATTRIBUTES;
+      const user = await this.userRepository.findBy(search, attributes);
+      return user;
+    } catch (err) {
+      throw err;
     }
-    const search = { ...body };
-    const attributes: any = UserConstants.DEFAULT_LISTING_ATTRIBUTES;
-    const user = await this.userRepository.findBy(search, attributes);
-    return user;
   }
 }

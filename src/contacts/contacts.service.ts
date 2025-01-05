@@ -9,28 +9,38 @@ export class ContactsService {
   constructor(private contactsRepository: ContactsRepository) {}
 
   async createContacts(body: CreateContactDto): Promise<ContactsModel[]> {
-    const createBody = { ...body };
-    const contacts = await this.contactsRepository.bulkCreate(
-      createBody.contactsArr ?? [],
-    );
-    return contacts;
+    try {
+      const createBody = { ...body };
+      const contacts = await this.contactsRepository.bulkCreate(
+        createBody.contactsArr ?? [],
+      );
+      return contacts;
+    } catch (err) {
+      throw err;
+    }
   }
 
   async getContacts(body: any): Promise<ContactsModel[]> {
-    const contacts = await this.contactsRepository.searchContacts(body.query);
+    try {
+      const contacts = await this.contactsRepository.searchContacts(body.query);
 
-    await Promise.all(
-      contacts.map(async (val) => {
-        val.dataValues.mobile = await decryptIt(val.dataValues.mobile);
-      }),
-    );
+      await Promise.all(
+        contacts.map(async (val) => {
+          val.dataValues.mobile = await decryptIt(val.dataValues.mobile);
+        }),
+      );
 
-    return contacts;
+      return contacts;
+    } catch (err) {
+      return;
+    }
   }
   async updateContact(mobile: string): Promise<number> {
     try {
       const encryptedMobile = await encryptIt(mobile['mobile']);
-      const updatedCount = await this.contactsRepository.update({mobile: encryptedMobile});
+      const updatedCount = await this.contactsRepository.update({
+        mobile: encryptedMobile,
+      });
       if (updatedCount === 0) {
         throw new Error('No contacts found with the given mobile number');
       }
