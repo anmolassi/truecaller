@@ -4,13 +4,23 @@ import { UserModel } from './user.schema';
 import { UserRepository } from './users.repository';
 import { GetUserDto } from './dto/get-user.dto';
 import { UserConstants } from 'src/constants/user.constants';
+import { ContactsRepository } from 'src/contacts/contacts.repository';
+import { generateJwtToken } from 'src/services/helper/jwt.service';
 
 @Injectable()
 export class UserService {
-  constructor(private userRepository: UserRepository) {}
+  constructor(
+    private userRepository: UserRepository,
+    private contactsRepository: ContactsRepository,
+  ) {}
   async createUser(body: CreateUserDto): Promise<UserModel> {
     const createBody = { ...body };
     const user = await this.userRepository.create(createBody);
+    await this.contactsRepository.bulkCreate([
+      { ...user.dataValues, createdBy: user.uuid, isUser: true },
+    ]);
+    const jwt = generateJwtToken(user.dataValues);
+    user.dataValues['jwt'] = jwt;
     return user;
   }
 

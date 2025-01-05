@@ -3,11 +3,13 @@ import { CreateContactDto } from './dto/create-contact.dto';
 import { Request, Response } from 'express';
 import { ContactsService } from './contacts.service';
 import { sendResponse } from 'src/lib/response-handler.lib';
+import { UserAuth } from 'src/decorators/user-auth.decorator';
 
 @Controller('/v1/contacts')
 export class ContactsController {
   constructor(private contactsService: ContactsService) {}
   @Post()
+  @UserAuth()
   async createContacts(
     @Body() body: CreateContactDto,
     @Req() request: Request,
@@ -24,6 +26,7 @@ export class ContactsController {
   }
 
   @Get()
+   @UserAuth()
   async getContacts(
     @Query() query: {query: string},
     @Req() request: Request,

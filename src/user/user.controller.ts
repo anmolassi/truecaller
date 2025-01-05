@@ -4,6 +4,7 @@ import { sendResponse } from 'src/lib/response-handler.lib';
 import { Request, Response } from 'express';
 import { CreateUserDto } from './dto/create-user.dto';
 import { GetUserDto } from './dto/get-user.dto';
+import { UserAuth } from 'src/decorators/user-auth.decorator';
 
 @Controller('/v1/user')
 export class UserController {
@@ -26,6 +27,7 @@ export class UserController {
   }
 
   @Get()
+  @UserAuth()
   async getUser(
     @Query() query: GetUserDto,
     @Req() request: Request,

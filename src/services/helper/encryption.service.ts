@@ -22,7 +22,7 @@ export const decryptIt = async (encryptedDataBase64: string) => {
   const iv = encryptedData.slice(0, 16);
   const encryptedText = encryptedData.slice(16);
 
-  const key = (await promisify(scrypt)(password, 'salt', 32)) as Buffer;
+  const key: Buffer = (await promisify(scrypt)(password, 'salt', 32)) as Buffer;
 
   const decipher = createDecipheriv('aes-256-ctr', key, iv);
 

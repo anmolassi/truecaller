@@ -7,7 +7,9 @@ import {
   BeforeCreate,
   ForeignKey,
   BelongsTo,
+  Default,
 } from 'sequelize-typescript';
+import asyncLocalStorage from 'src/services/helper/context-helper';
 import { encryptIt } from 'src/services/helper/encryption.service';
 import { UserModel } from 'src/user/user.schema';
 @Table({
@@ -26,8 +28,16 @@ export class ContactsModel extends Model {
   @Column({ type: DataType.STRING, allowNull: false })
   mobile: string;
 
+  @Default(0)
+  @Column({ type: DataType.INTEGER, allowNull: false })
+  spamReported: number;
+
+  @Default(0)
+  @Column({ type: DataType.BOOLEAN, allowNull: false })
+  isUser: boolean;
+
   @ForeignKey(() => UserModel)
-  @Column({ field: 'created_by', type: DataType.STRING, allowNull: false })
+  @Column({ field: 'created_by', type: DataType.STRING, allowNull: true })
   createdBy: string;
 
   @BelongsTo(() => UserModel, {
@@ -38,8 +48,13 @@ export class ContactsModel extends Model {
 
   @BeforeCreate
   static async hashPassword(contact: ContactsModel, options: any) {
-    //contact.createdBy = "5ca0a33b-89d7-4125-bb2a-25bdd31cac2f";
+    const uuid = asyncLocalStorage.getStore()?.get('uuid');
+    if (!uuid && !contact.createdBy) {
+      throw new Error('UUID is not available in asyncLocalStorage.');
+    }
+    if (uuid) {
+      contact.createdBy = uuid;
+    }
     contact.mobile = await encryptIt(String(contact.mobile));
   }
-  
 }
